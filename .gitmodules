@@ -1,0 +1,6 @@
+[submodule "ThirdParty/linenoise"]
+	path = ThirdParty/linenoise
+	url = https://github.com/antirez/linenoise.git
+[submodule "ThirdParty/googletest"]
+	path = ThirdParty/googletest
+	url = https://github.com/google/googletest.git
