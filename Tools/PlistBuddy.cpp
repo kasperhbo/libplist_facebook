@@ -37,6 +37,35 @@
 using libutil::Filesystem;
 using libutil::DefaultFilesystem;
 
+// case insensitive string type
+struct ci_char_traits : public std::char_traits<char> {
+    static bool eq(char c1, char c2) { return toupper(c1) == toupper(c2); }
+    static bool ne(char c1, char c2) { return toupper(c1) != toupper(c2); }
+    static bool lt(char c1, char c2) { return toupper(c1) <  toupper(c2); }
+    static int compare(const char* s1, const char* s2, size_t n) {
+        int s = 0;
+        while (n-- && !s) {
+            s = sign(toupper(*s1++) - toupper(*s2++));
+        }
+        return s;
+    }
+    static const char* find(const char* s, int n, char a) {
+        while (n-- > 0 && toupper(*s) != toupper(a)) {
+            ++s;
+        }
+        return s;
+    }
+private:
+    static int sign(int x) {
+        return (x > 0) - (x < 0);
+    }
+};
+class ci_string: public std::basic_string<char, ci_char_traits> {
+public:
+    ci_string(const std::string& s):
+        std::basic_string<char, ci_char_traits>(s.c_str()) {};
+};
+
 class Options {
 private:
     std::optional<bool>         _help;
@@ -579,7 +608,7 @@ ProcessCommand(
         return true;
     }
 
-    std::string command = tokens[0];
+    ci_string command = tokens[0];
     if (command == "Print") {
         std::queue<std::string> keyPath;
         if (tokens.size() > 1) {
