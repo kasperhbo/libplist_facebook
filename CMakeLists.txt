@@ -6,7 +6,7 @@
 # LICENSE file in the root directory of this source tree.
 #
 
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.18)
 project(plist)
 
 option(BUILD_SHARED_LIBS "Build shared library" ON)
@@ -60,6 +60,7 @@ add_library(plist
             #
             Sources/Format/Any.cpp
             )
+target_compile_options(plist BEFORE PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:-std=c++11>")
 
 if ("${CMAKE_SYSTEM_NAME}" MATCHES "Windows")
   if ("${CMAKE_CXX_PLATFORM_ID}" STREQUAL "MinGW")
@@ -69,7 +70,12 @@ if ("${CMAKE_SYSTEM_NAME}" MATCHES "Windows")
     target_link_libraries(plist PRIVATE xmllite Ole32)
   endif ()
 else ()
-  find_package(LibXml2 REQUIRED)
+  if ("${CMAKE_SYSTEM_NAME}" MATCHES "Darwin")
+    find_path(LIBXML2_INCLUDE_DIR NAMES "xmlversion.h" PATH_SUFFIXES "libxml" REQUIRED)
+    find_library(LIBXML2_LIBRARIES NAMES xml2 REQUIRED)
+  else ()
+    find_package(LibXml2 REQUIRED)
+  endif()
   if ("${CMAKE_SYSTEM_NAME}" MATCHES "OpenBSD")
     target_include_directories(plist PRIVATE "${LIBXML2_INCLUDE_DIRS}")
   else ()
@@ -95,15 +101,15 @@ add_library(util STATIC
             Util/Unix.cpp
             Util/Windows.cpp
             )
-target_compile_options(util BEFORE PRIVATE "-std=c++17")
+target_compile_options(util BEFORE PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:-std=c++17>")
 
 add_executable(plutil Tools/plutil.cpp)
-target_compile_options(plutil BEFORE PRIVATE "-std=c++17")
+target_compile_options(plutil BEFORE PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:-std=c++17>")
 target_link_libraries(plutil PRIVATE plist util)
 install(TARGETS plutil DESTINATION bin)
 
 add_executable(PlistBuddy Tools/PlistBuddy.cpp)
-target_compile_options(PlistBuddy BEFORE PRIVATE "-std=c++17")
+target_compile_options(PlistBuddy BEFORE PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:-std=c++17>")
 target_link_libraries(PlistBuddy PRIVATE plist util)
 install(TARGETS PlistBuddy DESTINATION bin)
 

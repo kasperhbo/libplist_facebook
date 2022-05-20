@@ -7,7 +7,7 @@ The source code is extracted from the Facebook [xcbuild](https://github.com/face
 ### Requirements
 
 * cmake
-* libxml2-dev
+* libxml2-dev (Linux/BSD)
 
 ### Build
 
