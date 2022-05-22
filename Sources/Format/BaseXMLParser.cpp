@@ -285,6 +285,36 @@ parse(std::vector<uint8_t> const &contents)
     GlobalFree(memory);
 
     return (ret == S_FALSE);
+#elif defined(USE_EXPAT)
+    XML_Status status;
+    auto startElement = [](void *userData, const XML_Char *name, const XML_Char **attrs) {
+        auto self = reinterpret_cast<BaseXMLParser *>(userData);
+        auto tag = std::string(reinterpret_cast<char const *>(name));
+        std::unordered_map<std::string, std::string> attr_map;
+        while (*attrs) {
+            std::string name = reinterpret_cast<char const *>(*attrs++);
+            attr_map.emplace(std::move(name), reinterpret_cast<char const *>(*attrs++));
+        }
+        self->onStartElement(tag, attr_map, self->_depth++);
+    };
+    auto endElement = [](void *userData, const XML_Char *name) {
+        auto self = reinterpret_cast<BaseXMLParser *>(userData);
+        auto tag = std::string(reinterpret_cast<char const *>(name));
+        self->onEndElement(tag, self->_depth--);
+    };
+    auto charData = [](void *userData, const XML_Char *s, int len) {
+        auto self = reinterpret_cast<BaseXMLParser *>(userData);
+        auto data = std::string(reinterpret_cast<char const *>(s), len);
+        self->onCharacterData(data, self->_depth);
+    };
+    XML_Parser _parser = XML_ParserCreate(NULL);
+    XML_SetUserData(_parser, this);
+    XML_SetElementHandler(_parser, startElement, endElement);
+    XML_SetCharacterDataHandler(_parser, charData);
+    _depth = 0;
+    status = XML_Parse(_parser, reinterpret_cast<char const *>(contents.data()), (int)contents.size(), true);
+    XML_ParserFree(_parser);
+    return status == XML_STATUS_OK;
 #else
     _parser = ::xmlReaderForMemory(reinterpret_cast<char const *>(contents.data()), contents.size(), nullptr, nullptr, XML_PARSE_NOENT | XML_PARSE_NONET);
     if (_parser == nullptr) {
@@ -404,7 +434,7 @@ error(std::string format, ...)
     } else {
         _column = static_cast<size_t>(column);
     }
-#else
+#elif !defined(USE_EXPAT)
     _line = ::xmlTextReaderGetParserLineNumber(_parser);
     _column = ::xmlTextReaderGetParserColumnNumber(_parser);
 #endif

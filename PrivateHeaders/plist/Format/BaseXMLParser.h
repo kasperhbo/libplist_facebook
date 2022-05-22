@@ -20,6 +20,8 @@
 #define COBJMACROS
 #include <ole2.h>
 #include <xmllite.h>
+#elif defined(USE_EXPAT)
+#include <expat.h>
 #else
 #include <libxml/xmlreader.h>
 #endif
@@ -31,6 +33,9 @@ class BaseXMLParser {
 private:
 #if _WIN32
     IXmlReader        *_reader;
+#elif defined(USE_EXPAT)
+    ::XML_Parser       _parser;
+    size_t             _depth;
 #else
     ::xmlTextReaderPtr _parser;
 #endif
