@@ -15,7 +15,7 @@
 
 namespace libutil {
 
-class FSUtil {
+class   FSUtil {
 public:
     static std::string GetDirectoryName(std::string const &path);
     static std::string GetBaseName(std::string const &path);

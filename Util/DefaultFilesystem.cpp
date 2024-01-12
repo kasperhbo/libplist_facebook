@@ -476,46 +476,6 @@ createFile(std::string const &path)
 bool DefaultFilesystem::
 read(std::vector<uint8_t> *contents, std::string const &path, size_t offset, std::optional<size_t> length) const
 {
-#if _WIN32
-    WideString wide = StringToWideString(path);
-
-    static DWORD const share = (FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE);
-    HANDLE handle = CreateFileW(wide.c_str(), GENERIC_READ, share, nullptr, OPEN_EXISTING, 0, nullptr);
-    if (handle == INVALID_HANDLE_VALUE) {
-        return false;
-    }
-
-    DWORD size = GetFileSize(handle, nullptr);
-    if (size == INVALID_FILE_SIZE) {
-        CloseHandle(handle);
-        return false;
-    }
-
-    if (SetFilePointer(handle, offset, nullptr, FILE_BEGIN) == INVALID_SET_FILE_POINTER) {
-        CloseHandle(handle);
-        return false;
-    }
-
-    if (length) {
-        if (offset + *length > static_cast<size_t>(size)) {
-            CloseHandle(handle);
-            return false;
-        }
-
-        size = *length;
-    }
-
-    *contents = std::vector<uint8_t>(size);
-
-    DWORD bytesRead;
-    if (!ReadFile(handle, contents->data(), size, &bytesRead, nullptr)) {
-        CloseHandle(handle);
-        return false;
-    }
-
-    CloseHandle(handle);
-    return true;
-#else
     FILE *fp = std::fopen(path.c_str(), "rb");
     if (fp == nullptr) {
         return false;

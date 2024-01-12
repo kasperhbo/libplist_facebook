@@ -3,7 +3,7 @@
  All rights reserved.
 
  This source code is licensed under the BSD-style license found in the
- LICENSE file in the root directory of this source tree.
+LICENSE file in the root directory of this source tree.
  */
 
 #include <plist/Array.h>
@@ -42,18 +42,17 @@ public:
      */
     class Format {
     private:
-         std::optional<plist::Format::Any>  _any;
-         std::optional<plist::Format::JSON> _json;
-
+        std::optional<plist::Format::Any> _any;
+        std::optional<plist::Format::JSON> _json;
     public:
         explicit Format(plist::Format::Any const &any);
+
         explicit Format(plist::Format::JSON const &json);
 
     public:
-        std::optional<plist::Format::Any> const &any() const
-        { return _any; }
-        std::optional<plist::Format::JSON> const &json() const
-        { return _json; }
+        std::optional<plist::Format::Any> const &any() const { return _any; }
+
+        std::optional<plist::Format::JSON> const &json() const { return _json; }
     };
 
 public:
@@ -67,116 +66,104 @@ public:
         };
 
     private:
-        Type                                 _type;
-        std::string                          _path;
+        Type _type;
+        std::string _path;
         std::unique_ptr<plist::Object const> _value;
 
     public:
         Adjustment(Type type, std::string const &path, std::unique_ptr<plist::Object const> value);
 
     public:
-        Type type() const
-        { return _type; }
-        std::string const &path() const
-        { return _path; }
-        plist::Object const *value() const
-        { return _value.get(); }
+        Type type() const { return _type; }
+
+        std::string const &path() const { return _path; }
+
+        plist::Object const *value() const { return _value.get(); }
     };
 
 private:
-    std::optional<bool>        _help;
-    std::optional<bool>        _print;
-    std::optional<bool>        _lint;
+    std::optional<bool> _help;
+    std::optional<bool> _print;
+    std::optional<bool> _lint;
 
 private:
-    std::optional<Format>      _convert;
+    std::optional<Format> _convert;
 
 public:
-    std::vector<Adjustment>    _adjustments;
+    std::vector<Adjustment> _adjustments;
 
 private:
-    std::vector<std::string>   _inputs;
+    std::vector<std::string> _inputs;
     std::optional<std::string> _output;
     std::optional<std::string> _extension;
-    std::optional<bool>        _separator;
+    std::optional<bool> _separator;
 
 private:
-    std::optional<bool>        _silent;
-    std::optional<bool>        _humanReadable;
+    std::optional<bool> _silent;
+    std::optional<bool> _humanReadable;
 
 public:
     Options();
+
     ~Options();
 
 public:
-    bool help() const
-    { return _help.value_or(false); }
-    bool print() const
-    { return _print.value_or(false); }
-    bool lint() const
-    { return _lint.value_or(false); }
+    bool help() const { return _help.value_or(false); }
+
+    bool print() const { return _print.value_or(false); }
+
+    bool lint() const { return _lint.value_or(false); }
 
 public:
-    std::optional<Format> const &convert() const
-    { return _convert; }
+    std::optional<Format> const &convert() const { return _convert; }
 
 public:
-    std::vector<Adjustment> const &adjustments() const
-    { return _adjustments; }
+    std::vector<Adjustment> const &adjustments() const { return _adjustments; }
 
 public:
-    std::vector<std::string> const &inputs() const
-    { return _inputs; }
-    std::optional<std::string> const &output() const
-    { return _output; }
-    std::optional<std::string> const &extension() const
-    { return _extension; }
+    std::vector<std::string> const &inputs() const { return _inputs; }
+
+    std::optional<std::string> const &output() const { return _output; }
+
+    std::optional<std::string> const &extension() const { return _extension; }
 
 public:
-    bool silent() const
-    { return _silent.value_or(false); }
-    bool humanReadable() const
-    { return _humanReadable.value_or(false); }
+    bool silent() const { return _silent.value_or(false); }
+
+    bool humanReadable() const { return _humanReadable.value_or(false); }
 
 private:
     friend class libutil::Options;
+
     std::pair<bool, std::string>
     parseArgument(std::vector<std::string> const &args, std::vector<std::string>::const_iterator *it);
 };
 
 Options::
-Options()
-{
+Options() {
 }
 
 Options::
-~Options()
-{
+~Options() {
+}
+
+Options::Format::Format(plist::Format::Any const &any) : _any(any) {
 }
 
 Options::Format::
-Format(plist::Format::Any const &any) :
-    _any(any)
-{
-}
-
-Options::Format::
-Format(plist::Format::JSON const &json) :
-    _json(json)
-{
+Format(plist::Format::JSON const &json) : _json(json) {
 }
 
 Options::Adjustment::
 Adjustment(Type type, std::string const &path, std::unique_ptr<plist::Object const> value) :
-    _type (type),
-    _path (path),
-    _value(std::move(value))
-{
+        _type(type),
+        _path(path),
+        _value(std::move(value)) {
 }
 
 static std::pair<bool, std::string>
-NextFormat(std::optional<Options::Format> *format, std::vector<std::string> const &args, std::vector<std::string>::const_iterator *it)
-{
+NextFormat(std::optional<Options::Format> *format, std::vector<std::string> const &args,
+           std::vector<std::string>::const_iterator *it) {
     std::optional<std::string> value;
     std::pair<bool, std::string> result = libutil::Options::Next<std::string>(&value, args, it);
     if (result.first) {
@@ -199,8 +186,7 @@ NextFormat(std::optional<Options::Format> *format, std::vector<std::string> cons
 }
 
 static std::pair<bool, std::string>
-SanitizeXMLFormat(std::string *value)
-{
+SanitizeXMLFormat(std::string *value) {
     std::string::size_type body = 0;
 
     std::string xml = "<?xml";
@@ -251,8 +237,8 @@ SanitizeXMLFormat(std::string *value)
 }
 
 static std::pair<bool, std::string>
-NextAdjustment(Options::Adjustment *adjustment, Options::Adjustment::Type type, std::vector<std::string> const &args, std::vector<std::string>::const_iterator *it)
-{
+NextAdjustment(Options::Adjustment *adjustment, Options::Adjustment::Type type, std::vector<std::string> const &args,
+               std::vector<std::string>::const_iterator *it) {
     std::pair<bool, std::string> result;
 
     std::optional<std::string> path;
@@ -337,8 +323,7 @@ NextAdjustment(Options::Adjustment *adjustment, Options::Adjustment::Type type, 
 }
 
 std::pair<bool, std::string> Options::
-parseArgument(std::vector<std::string> const &args, std::vector<std::string>::const_iterator *it)
-{
+parseArgument(std::vector<std::string> const &args, std::vector<std::string>::const_iterator *it) {
     std::string const &arg = **it;
 
     if (_separator) {
@@ -366,7 +351,8 @@ parseArgument(std::vector<std::string> const &args, std::vector<std::string>::co
         }
         return result;
     } else if (arg == "-replace") {
-        Options::Adjustment adjustment = Options::Adjustment(Options::Adjustment::Type::Replace, std::string(), nullptr);
+        Options::Adjustment adjustment = Options::Adjustment(Options::Adjustment::Type::Replace, std::string(),
+                                                             nullptr);
         std::pair<bool, std::string> result = NextAdjustment(&adjustment, Options::Adjustment::Type::Replace, args, it);
         if (result.first) {
             _adjustments.emplace_back(std::move(adjustment));
@@ -416,8 +402,7 @@ parseArgument(std::vector<std::string> const &args, std::vector<std::string>::co
 }
 
 static int
-Help(std::string const &error = std::string())
-{
+Help(std::string const &error = std::string()) {
     if (!error.empty()) {
         fprintf(stderr, "error: %s\n", error.c_str());
         fprintf(stderr, "\n");
@@ -457,8 +442,7 @@ Help(std::string const &error = std::string())
 }
 
 static std::pair<bool, std::vector<uint8_t>>
-Read(Filesystem const *filesystem, std::string const &path = "-")
-{
+Read(Filesystem const *filesystem, std::string const &path = "-") {
     std::vector<uint8_t> contents;
 
     if (path == "-") {
@@ -475,8 +459,7 @@ Read(Filesystem const *filesystem, std::string const &path = "-")
 }
 
 static bool
-Write(Filesystem *filesystem, std::vector<uint8_t> const &contents, std::string const &path = "-")
-{
+Write(Filesystem *filesystem, std::vector<uint8_t> const &contents, std::string const &path = "-") {
     if (path == "-") {
         /* - means write to stdout. */
         std::copy(contents.begin(), contents.end(), std::ostream_iterator<char>(std::cout));
@@ -491,8 +474,7 @@ Write(Filesystem *filesystem, std::vector<uint8_t> const &contents, std::string 
 }
 
 static bool
-Lint(Options const &options, std::string const &file)
-{
+Lint(Options const &options, std::string const &file) {
     if (!options.silent()) {
         /* Already linted by virtue of getting this far. */
         printf("%s: OK\n", file.c_str());
@@ -502,8 +484,7 @@ Lint(Options const &options, std::string const &file)
 }
 
 static bool
-Print(Filesystem *filesystem, Options const &options, std::unique_ptr<plist::Object> object)
-{
+Print(Filesystem *filesystem, Options const &options, std::unique_ptr<plist::Object> object) {
     /* Convert to ASCII. */
     plist::Format::ASCII out = plist::Format::ASCII::Create(false, plist::Format::Encoding::UTF8);
     auto serialize = plist::Format::ASCII::Serialize(object.get(), out);
@@ -522,8 +503,7 @@ Print(Filesystem *filesystem, Options const &options, std::unique_ptr<plist::Obj
 }
 
 static std::string
-OutputPath(Options const &options, std::string const &file)
-{
+OutputPath(Options const &options, std::string const &file) {
     if (options.output()) {
         /* A specified output path. */
         return *options.output();
@@ -531,7 +511,8 @@ OutputPath(Options const &options, std::string const &file)
 
     if (file != "-" && options.extension()) {
         /* Replace the file extension with the provided one. */
-        return FSUtil::GetDirectoryName(file) + "/" + FSUtil::GetBaseNameWithoutExtension(file) + "." + *options.extension();
+        return FSUtil::GetDirectoryName(file) + "/" + FSUtil::GetBaseNameWithoutExtension(file) + "." +
+               *options.extension();
     }
 
     /* Default to overwriting the input. */
@@ -539,8 +520,8 @@ OutputPath(Options const &options, std::string const &file)
 }
 
 static void
-PerformAdjustment(plist::Object *object, plist::Object **rootObject, std::string const &key, Options::Adjustment const &adjustment)
-{
+PerformAdjustment(plist::Object *object, plist::Object **rootObject, std::string const &key,
+                  Options::Adjustment const &adjustment) {
     if (plist::Dictionary *dict = plist::CastTo<plist::Dictionary>(object)) {
         switch (adjustment.type()) {
             case Options::Adjustment::Type::Insert:
@@ -598,12 +579,12 @@ PerformAdjustment(plist::Object *object, plist::Object **rootObject, std::string
 }
 
 static bool
-Modify(Filesystem *filesystem, Options const &options, std::string const &file, std::unique_ptr<plist::Object> object, Options::Format const &inputFormat)
-{
+Modify(Filesystem *filesystem, Options const &options, std::string const &file, std::unique_ptr<plist::Object> object,
+       Options::Format const &inputFormat) {
     plist::Object *writeObject = object.get();
 
     /* Apply requested adjustments. */
-    for (Options::Adjustment const &adjustment : options.adjustments()) {
+    for (Options::Adjustment const &adjustment: options.adjustments()) {
         plist::Object *currentObject = writeObject;
 
         std::string path = adjustment.path();
@@ -664,12 +645,13 @@ Modify(Filesystem *filesystem, Options const &options, std::string const &file, 
 }
 
 int
-main(int argc, char **argv)
-{
+main(int argc, char **argv) {
     DefaultFilesystem filesystem = DefaultFilesystem();
 
     Options options;
-    std::pair<bool, std::string> result = libutil::Options::Parse<Options>(&options, std::vector<std::string>(argv + 1, argv + argc));
+    std::pair<bool, std::string> result = libutil::Options::Parse<Options>(&options, std::vector<std::string>(argv + 1,
+                                                                                                              argv +
+                                                                                                              argc));
     if (!result.first) {
         return Help(result.second);
     }
@@ -691,54 +673,48 @@ main(int argc, char **argv)
     } else {
         bool success = true;
 
-        if (options.inputs().empty()) {
-            return Help("no input files");
+        const std::string file = "/Users/k.debruin/Library/LaunchAgents/com.kasper.plist";
+        std::pair<bool, std::vector<uint8_t>> result = Read(&filesystem, file);
+        if (!result.first) {
+            fprintf(stderr, "error: unable to read %s\n", file.c_str());
+            success = false;
+            return -1;
         }
 
-        /* Actions applied to each input file separately. */
-        for (std::string const &file : options.inputs()) {
-            std::pair<bool, std::vector<uint8_t>> result = Read(&filesystem, file);
-            if (!result.first) {
-                fprintf(stderr, "error: unable to read %s\n", file.c_str());
-                success = false;
-                continue;
-            }
+        /* Deserialize input, storing input format. */
+        std::optional<Options::Format> format;
+        std::unique_ptr<plist::Object> root;
 
-            /* Deserialize input, storing input format. */
-            std::optional<Options::Format> format;
-            std::unique_ptr<plist::Object> root;
-
-            if (auto any = plist::Format::Any::Identify(result.second)) {
-                auto deserialize = plist::Format::Any::Deserialize(result.second, *any);
-                if (deserialize.first != nullptr) {
-                    root = std::move(deserialize.first);
-                    format = Options::Format(*any);
-                } else {
-                    fprintf(stderr, "error: %s\n", deserialize.second.c_str());
-                    success = false;
-                    continue;
-                }
+        if (auto any = plist::Format::Any::Identify(result.second)) {
+            auto deserialize = plist::Format::Any::Deserialize(result.second, *any);
+            if (deserialize.first != nullptr) {
+                root = std::move(deserialize.first);
+                format = Options::Format(*any);
             } else {
-                auto json = plist::Format::JSON::Create();
-                auto deserialize = plist::Format::JSON::Deserialize(result.second, json);
-                if (deserialize.first != nullptr) {
-                    root = std::move(deserialize.first);
-                    format = Options::Format(json);
-                } else {
-                    fprintf(stderr, "error: input %s not a plist or json\n", file.c_str());
-                    success = false;
-                    continue;
-                }
+                fprintf(stderr, "error: %s\n", deserialize.second.c_str());
+                success = false;
+                return -1;
             }
+        } else {
+            auto json = plist::Format::JSON::Create();
+            auto deserialize = plist::Format::JSON::Deserialize(result.second, json);
+            if (deserialize.first != nullptr) {
+                root = std::move(deserialize.first);
+                format = Options::Format(json);
+            } else {
+                fprintf(stderr, "error: input %s not a plist or json\n", file.c_str());
+                success = false;
+                return -1;
+            }
+        }
 
-            /* Perform the sepcific action. */
-            if (modify) {
-                success &= Modify(&filesystem, options, file, std::move(root), *format);
-            } else if (options.print()) {
-                success &= Print(&filesystem, options, std::move(root));
-            } else if (options.lint() || true) {
-                success &= Lint(options, file);
-            }
+        /* Perform the sepcific action. */
+        if (modify) {
+            success &= Modify(&filesystem, options, file, std::move(root), *format);
+        } else if (options.print()) {
+            success &= Print(&filesystem, options, std::move(root));
+        } else if (options.lint() || true) {
+            success &= Lint(options, file);
         }
 
         return (success ? 0 : 1);
